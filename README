@@ -2,9 +2,13 @@ pdflib README
 
 Contents
 1) How to Start
+2) Development style guide
 
 ===============================================================================
 
 1) How to Start
 
 python pdflib_gui.py
+
+2) Development style guide
+For now, the only requirement is to use tabs in all of the .py files.
