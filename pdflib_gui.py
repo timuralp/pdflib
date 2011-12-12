@@ -228,6 +228,7 @@ class PDFLibFrame(wx.Frame):
 		self.__doc_list.Bind(wx.EVT_LISTBOX, self.OnDocListBox)
 		self.__doc_list.Bind(wx.EVT_LISTBOX_DCLICK, self.OnListDblClick)
 		self.Bind(wx.EVT_TOOL, self.OnAddDocument, id = wx.ID_ADD)
+		self.Bind(wx.EVT_TOOL, self.OnMakeBib, id = wx.ID_FILE1)
 
 	def InitializeDocList(self):
 		self.__docs = LoadDocumentsFromDB()
@@ -286,6 +287,35 @@ class PDFLibFrame(wx.Frame):
 		# add the paper to the DB and the list
 		AddDocumentToDB(paper)
 		self.UpdateDocList(paper)
+
+	def OnMakeBib(self, event):
+		clicked = self.__doc_list.GetClientData(self.__doc_list.GetSelection())
+		if not clicked:
+			return
+		name = clicked.GetTitle()
+		year = str(clicked.GetYear())
+		authors = clicked.GetAuthor()
+
+		ref_name = authors.split(',')[0].split(' ')[1]+year
+		author_list = []
+		for a in authors.split(','):
+			a = a.strip()
+			author_names = a.split(' ')
+			first = author_names[0]
+			last = author_names[-1]
+			if not first.endswith('.'):
+				author_list.append(last + ', ' + first[0] + '.')
+			else:
+				author_list.append(last + ', ' + first)
+		authors_line = ' and '.join(author_list)
+
+		msg = '@inproceedings{%s,\n' % ref_name
+		msg += '\ttitle = {{%s}},\n' % name
+		msg += '\tauthor = {%s},\n' % authors_line
+		msg += '\tyear = {%s},\n' % year
+		msg += '}'
+
+		wx.MessageBox(msg, 'bibtex entry for %s' % ref_name, wx.OK)
 
 app = wx.App()
 PDFLibFrame(None, -1, "PDFLib")
