@@ -15,8 +15,12 @@ PAPER_ADD = 0
 PAPER_DEL = 1
 PAPER_UPDATE = 2
 
+ADD_ID 	= 1
+BIB_ID 	= 2
+EDIT_ID = 3
+
 def ParsePDF(path):
-	return None
+	return Paper()
 
 	# in the future, figure out how to extract the title, authors, etc
 	try:
@@ -40,12 +44,12 @@ def ParsePDF(path):
 	txt = txt.encode("ascii", "ignore")
 
 class DocumentPromptDialog(wx.Dialog):
-	def __init__(self, parent, id, title):
+	def __init__(self, parent, id, title, paper = None):
 		wx.Dialog.__init__(self, parent, id, title)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
-		input_boxes = [u"Title:", u"Authors:", u"Year:"]
+		input_boxes = [u"Title:", u"Authors:", u"Year:", u"Venue:"]
 		bttn_sizer = self.CreateButtonSizer(wx.CANCEL|wx.OK)
 		self.ctrl = {}
 
@@ -73,6 +77,9 @@ class DocumentPromptDialog(wx.Dialog):
 		self.__results['year'] = int(self.ctrl[u'Year:'].GetValue())
 		return self.__results
 
+def make_image(path):
+	return wx.Image(icon_path+path, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+
 class PDFLibFrame(wx.Frame):
 	def __init__(self, parent, id, title):
 		wx.Frame.__init__(self, parent, id, title)
@@ -80,10 +87,15 @@ class PDFLibFrame(wx.Frame):
 		# add the necessary lists, menus, buttons
 		self.__grid = wx.GridBagSizer(5, 5)
 		self.__toolbar = wx.ToolBar(self, -1, style = wx.TB_HORIZONTAL)
-		add_img = wx.Image(icon_path+"actions/list-add.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap()
-		bib_img = wx.Image(icon_path+"actions/document-properties.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap()
-		self.__toolbar.AddSimpleTool(wx.ID_ADD, add_img, 'Add document', '')
-		self.__toolbar.AddSimpleTool(wx.ID_FILE1, bib_img, 'Make a bib', '')
+		add_img = make_image("actions/list-add.png")
+		bib_img = make_image("actions/document-properties.png")
+		edit_img = make_image("actions/edit-find-replace.png")
+		self.__toolbar.AddLabelTool(ADD_ID, '', add_img,
+									shortHelp = 'Add document')
+		self.__toolbar.AddLabelTool(BIB_ID, '', bib_img,
+									shortHelp = 'Make a bib')
+		self.__toolbar.AddLabelTool(EDIT_ID, '', edit_img,
+									shortHelp = 'Edit entry')
 		self.__toolbar.Realize()
 
 		self.__doc_list = wx.ListBox(self, -1, style = wx.LB_SINGLE | wx.LB_SORT)
@@ -106,8 +118,8 @@ class PDFLibFrame(wx.Frame):
 
 		self.__doc_list.Bind(wx.EVT_LISTBOX, self.OnDocListBox)
 		self.__doc_list.Bind(wx.EVT_LISTBOX_DCLICK, self.OnListDblClick)
-		self.Bind(wx.EVT_TOOL, self.OnAddDocument, id = wx.ID_ADD)
-		self.Bind(wx.EVT_TOOL, self.OnMakeBib, id = wx.ID_FILE1)
+		self.Bind(wx.EVT_TOOL, self.OnAddDocument, id = ADD_ID)
+		self.Bind(wx.EVT_TOOL, self.OnMakeBib, id = BIB_ID)
 
 	def InitializeDocList(self):
 		self.__docs = load_docs_from_db()
@@ -143,24 +155,31 @@ class PDFLibFrame(wx.Frame):
 		# prompt for the document to add
 		dialog = wx.FileDialog(None, message = 'Select a file...', style = wx.OPEN, wildcard = '*.pdf')
 
+		file_path = None
+		paper = None
+
 		if dialog.ShowModal() == wx.ID_OK:
 			file_path = dialog.GetPath()
 
-		paper = ParsePDF(file_path)
+		if file_path and len(file_path) > 0:
+			paper = ParsePDF(file_path)
 		dialog.Destroy()
 
-		if paper == None:
-			dialog = DocumentPromptDialog(self, -1, "PDF Information Prompt")
-			result = dialog.ShowModal()
-			if result == wx.ID_OK:
-				info = dialog.GetData()
-				if info != None:
-					paper = Paper(title=info['title'], author=info['authors'],\
-									year=info['year'], filename=file_path)
-			else:
-				print "not ok??", result
-			dialog.Destroy()
-		if paper == None:
+		if not paper:
+			return
+
+		dialog = DocumentPromptDialog(self, -1, "PDF Information Prompt", paper)
+		result = dialog.ShowModal()
+		if result == wx.ID_OK:
+			info = dialog.GetData()
+			if info != None:
+				paper = Paper(title=info['title'], author=info['authors'],\
+								year=info['year'], filename=file_path)
+		else:
+			print "not ok??", result
+			paper = None
+		dialog.Destroy()
+		if not paper:
 			return
 		
 		# add the paper to the DB and the list
@@ -196,6 +215,7 @@ class PDFLibFrame(wx.Frame):
 
 		wx.MessageBox(msg, 'bibtex entry for %s' % ref_name, wx.OK)
 
-app = wx.App()
-PDFLibFrame(None, -1, "PDFLib")
-app.MainLoop()
+if __name__ == '__main__':
+	app = wx.App()
+	PDFLibFrame(None, -1, "PDFLib")
+	app.MainLoop()
