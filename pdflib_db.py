@@ -6,28 +6,46 @@ pdf_repo = pdf_main+'/docs'
 db_path = pdf_main+'/pdflib.db'
 
 class Paper:
-	def __init__(self, author=None, title=None, year=None, filename = None):
+	def __init__(self, author = None, title = None, year = None,
+				filename = None,
+				venue = None):
 		self.__author = author
 		self.__title = title
 		self.__year = year
 		self.__file = filename
+		self.__venue = venue
 	
-	def GetTitle(self):
+	def get_title(self):
 		return self.__title
-	def GetYear(self):
+
+	def get_year(self):
 		return self.__year
-	def GetAuthor(self):
+
+	def get_author(self):
 		return self.__author
-	def GetFile(self):
+
+	def get_file(self):
 		return self.__file
 
-	def SetFileName(self, fn):
+	def get_venue(self):
+		return self.__venue
+
+	def set_title(self, title):
+		self.title = title
+
+	def set_file(self, fn):
 		self.__file = fn
 
-	def SetAuthors(self, authors):
-		self.__author = authors
+	def set_author(self, author):
+		self.__author = author
+	
+	def set_venue(self, venue):
+		self.__venue = venue
+	
+	def set_year(self, year):
+		self.__year = year
 
-	def Valid(self):
+	def is_valid(self):
 		if self.__author == None:
 			return False
 		if self.__title == None:
@@ -43,8 +61,8 @@ def init_repo():
 		os.mkdir(pdf_main)
 	os.mkdir(pdf_repo)
 
-def CreateDB(cursor):
-	q = 'create table docs (id integer primary key not null, title text, authors text, year integer, file text)'
+def create_db(cursor):
+	q = 'create table docs (id integer primary key not null, title text, authors text, year integer, file text, venue text)'
 	cursor.execute(q)
 
 def load_docs_from_db():
@@ -56,7 +74,7 @@ def load_docs_from_db():
 	db = sqlite3.connect(db_path)
 	c = db.cursor()
 	if make_db:
-		CreateDB(c)
+		create_db(c)
 		db.commit()
 		return None
 
@@ -74,7 +92,7 @@ def load_docs_from_db():
 	return [Paper(title = r[0], author = r[1], year = r[2], filename = r[3]) for r in recs]
 
 def add_doc_to_db(paper):
-	if paper == None or not paper.Valid():
+	if paper == None or not paper.is_valid():
 		return
 
 	make_db = False
@@ -85,14 +103,14 @@ def add_doc_to_db(paper):
 	db = sqlite3.connect(db_path)
 	c = db.cursor()
 	if make_db:
-		CreateDB(c)
+		create_db(c)
 		db.commit()
 
 	q = 'insert into docs (title, authors, year, file) values(?, ?, ?, ?)'
-	authors = paper.GetAuthor()
-	title = paper.GetTitle()
-	year = paper.GetYear()
-	filename = os.path.basename(paper.GetFile())
+	authors = paper.get_author()
+	title = paper.get_title()
+	year = paper.get_year()
+	filename = os.path.basename(paper.get_file())
 
 	if isinstance(authors, list):
 		db_authors = ', '.join(authors)
@@ -106,10 +124,10 @@ def add_doc_to_db(paper):
 	#else:
 	#	file_authors = authors.replace(' ', '')
 	
-	#name = paper.GetTitle().replace(' ', '') + '_' + file_authors + '.pdf'
+	#name = paper.get_title().replace(' ', '') + '_' + file_authors + '.pdf'
 	# Use an MD5 hash of name+authors
 	while 1:
-		name=hashlib.md5(paper.GetTitle()+'_' +file_authors).hexdigest()+'.pdf'
+		name=hashlib.md5(paper.get_title()+'_' +file_authors).hexdigest()+'.pdf'
 
 		# check for existence
 		if not os.path.exists(pdf_repo+'/'+name):
@@ -122,10 +140,10 @@ def add_doc_to_db(paper):
 	c.close()
 	db.close()
 
-	paper.SetAuthors(db_authors)
+	paper.set_author(db_authors)
 
 	# move the documents to the repository
 	# construct the name
-	shutil.move(paper.GetFile(), pdf_repo + '/' + name)
-	paper.SetFileName(name)
+	shutil.move(paper.get_file(), pdf_repo + '/' + name)
+	paper.set_file(name)
 

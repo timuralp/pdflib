@@ -7,9 +7,7 @@ import shutil
 import hashlib
 import subprocess
 
-from pdflib_db import Paper
-from pdflib_db import load_docs_from_db
-from pdflib_db import add_doc_to_db
+from pdflib_db import Paper, load_docs_from_db, add_doc_to_db
 
 icon_path = "tango-icon-theme/32x32/"
 
@@ -118,10 +116,10 @@ class PDFLibFrame(wx.Frame):
 
 		for doc in self.__docs:
 			# set the list entries
-			self.__doc_list.Append(doc.GetTitle(), clientData = doc)
+			self.__doc_list.Append(doc.get_title(), clientData = doc)
 
 	def UpdateDocList(self, paper, action = PAPER_ADD):
-		self.__doc_list.Append(paper.GetTitle(), clientData = paper)
+		self.__doc_list.Append(paper.get_title(), clientData = paper)
 
 	def OnDocListBox(self, event):
 		clicked = self.__doc_list.GetClientData(self.__doc_list.GetSelection())
@@ -130,9 +128,9 @@ class PDFLibFrame(wx.Frame):
 
 		# set the properties in the text box
 		self.__doc_properties.Clear()
-		self.__doc_properties.WriteText("Title: %s\n" % clicked.GetTitle())
-		self.__doc_properties.WriteText("Authors: %s\n" % clicked.GetAuthor())
-		self.__doc_properties.WriteText("Year: %d" % clicked.GetYear())
+		self.__doc_properties.WriteText("Title: %s\n" % clicked.get_title())
+		self.__doc_properties.WriteText("Authors: %s\n" % clicked.get_author())
+		self.__doc_properties.WriteText("Year: %d" % clicked.get_year())
 
 	def OnListDblClick(self, event):
 		clicked = self.__doc_list.GetClientData(self.__doc_list.GetSelection())
@@ -173,9 +171,9 @@ class PDFLibFrame(wx.Frame):
 		clicked = self.__doc_list.GetClientData(self.__doc_list.GetSelection())
 		if not clicked:
 			return
-		name = clicked.GetTitle()
-		year = str(clicked.GetYear())
-		authors = clicked.GetAuthor()
+		name = clicked.get_title()
+		year = str(clicked.get_year())
+		authors = clicked.get_author()
 
 		ref_name = authors.split(',')[0].split(' ')[1]+year
 		author_list = []
