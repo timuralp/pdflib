@@ -99,16 +99,35 @@ class PDFLibFrame(wx.Frame):
 		self.__toolbar.Realize()
 
 		self.__doc_list = wx.ListBox(self, -1, style = wx.LB_SINGLE | wx.LB_SORT)
-		
+
 		self.__doc_properties = wx.TextCtrl(self, -1, style = wx.TE_MULTILINE)
 		self.__doc_properties.SetEditable(False)
-		
-		self.__grid.Add(self.__toolbar, (0, 0), (1, 30), wx.EXPAND)
-		self.__grid.Add(self.__doc_list, (1, 10), (6, 20), wx.EXPAND|wx.RIGHT, border=10)
-		self.__grid.Add(self.__doc_properties, (7, 10), (5, 20), wx.EXPAND|wx.RIGHT|wx.BOTTOM, border=10)
+	
+		self.__title_txt = wx.StaticText(self, -1, label = 'Title:')
+		self.__author_txt = wx.StaticText(self, -1, label = 'Author:')
+		self.__venue_txt = wx.StaticText(self, -1, label = 'Venue:')
+		self.__year_txt = wx.StaticText(self, -1, label = 'Year:')
+		self.__find_title = wx.TextCtrl(self, -1)
+		self.__find_author = wx.TextCtrl(self, -1)
+		self.__find_venue = wx.TextCtrl(self, -1)
+		self.__find_year = wx.TextCtrl(self, -1)
+		self.__find_bttn = wx.Button(self, wx.ID_FIND)
 
-		self.__grid.AddGrowableCol(10)
-		self.__grid.AddGrowableRow(1)
+		self.__grid.Add(self.__toolbar, (0, 0), wx.GBSpan(1, 40), wx.EXPAND)
+		self.__grid.Add(self.__title_txt, (1, 0), flag = wx.LEFT, border = 10)
+		self.__grid.Add(self.__find_title, (2, 0), flag = wx.LEFT, border = 10)
+		self.__grid.Add(self.__author_txt, (3, 0), flag = wx.LEFT, border = 10)
+		self.__grid.Add(self.__find_author, (4, 0), flag = wx.LEFT, border = 10)
+		self.__grid.Add(self.__venue_txt, (5, 0), flag = wx.LEFT, border = 10)
+		self.__grid.Add(self.__find_venue, (6, 0), flag = wx.LEFT, border = 10)
+		self.__grid.Add(self.__year_txt, (7, 0), flag = wx.LEFT, border = 10)
+		self.__grid.Add(self.__find_year, (8, 0), flag = wx.LEFT, border = 10)
+		self.__grid.Add(self.__find_bttn, (9, 0), flag = wx.LEFT, border = 10)
+		self.__grid.Add(self.__doc_list, (1, 1), wx.GBSpan(10, 40), wx.EXPAND|wx.RIGHT, border=10)
+		self.__grid.Add(self.__doc_properties, (11, 1), (10, 40), wx.EXPAND|wx.RIGHT|wx.BOTTOM, border=10)
+
+		#self.__grid.AddGrowableCol(10)
+		#self.__grid.AddGrowableRow(1)
 
 		self.SetSizer(self.__grid)
 		self.__grid.Fit(self)
@@ -120,6 +139,7 @@ class PDFLibFrame(wx.Frame):
 		self.__doc_list.Bind(wx.EVT_LISTBOX_DCLICK, self.OnListDblClick)
 		self.Bind(wx.EVT_TOOL, self.OnAddDocument, id = ADD_ID)
 		self.Bind(wx.EVT_TOOL, self.OnMakeBib, id = BIB_ID)
+		self.Bind(wx.EVT_SIZE, self.OnSize)
 
 	def InitializeDocList(self):
 		self.__docs = load_docs_from_db()
@@ -214,6 +234,15 @@ class PDFLibFrame(wx.Frame):
 		msg += '}'
 
 		wx.MessageBox(msg, 'bibtex entry for %s' % ref_name, wx.OK)
+
+	def OnSize(self, event):
+		x, y = event.GetSize()
+		#doc_list_size = 
+		#self.__doc_list.SetMinSize(event.GetSize())
+		#self.__grid.SetMinSize(event.GetSize())
+		self.__grid.Fit(self)
+		self.Layout()
+		self.Refresh()
 
 if __name__ == '__main__':
 	app = wx.App()
