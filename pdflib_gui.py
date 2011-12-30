@@ -19,6 +19,9 @@ ADD_ID 	= 1
 BIB_ID 	= 2
 EDIT_ID = 3
 
+MAIN_BORDER= 10
+GAP = 5
+
 def ParsePDF(path):
 	return Paper()
 
@@ -85,7 +88,7 @@ class PDFLibFrame(wx.Frame):
 		wx.Frame.__init__(self, parent, id, title)
 
 		# add the necessary lists, menus, buttons
-		self.__grid = wx.GridBagSizer(5, 5)
+		self.__grid = wx.GridBagSizer(GAP, GAP)
 		self.__toolbar = wx.ToolBar(self, -1, style = wx.TB_HORIZONTAL)
 		add_img = make_image("actions/list-add.png")
 		bib_img = make_image("actions/document-properties.png")
@@ -114,17 +117,28 @@ class PDFLibFrame(wx.Frame):
 		self.__find_bttn = wx.Button(self, wx.ID_FIND)
 
 		self.__grid.Add(self.__toolbar, (0, 0), wx.GBSpan(1, 40), wx.EXPAND)
-		self.__grid.Add(self.__title_txt, (1, 0), flag = wx.LEFT, border = 10)
-		self.__grid.Add(self.__find_title, (2, 0), flag = wx.LEFT, border = 10)
-		self.__grid.Add(self.__author_txt, (3, 0), flag = wx.LEFT, border = 10)
-		self.__grid.Add(self.__find_author, (4, 0), flag = wx.LEFT, border = 10)
-		self.__grid.Add(self.__venue_txt, (5, 0), flag = wx.LEFT, border = 10)
-		self.__grid.Add(self.__find_venue, (6, 0), flag = wx.LEFT, border = 10)
-		self.__grid.Add(self.__year_txt, (7, 0), flag = wx.LEFT, border = 10)
-		self.__grid.Add(self.__find_year, (8, 0), flag = wx.LEFT, border = 10)
-		self.__grid.Add(self.__find_bttn, (9, 0), flag = wx.LEFT, border = 10)
-		self.__grid.Add(self.__doc_list, (1, 1), wx.GBSpan(10, 40), wx.EXPAND|wx.RIGHT, border=10)
-		self.__grid.Add(self.__doc_properties, (11, 1), (10, 40), wx.EXPAND|wx.RIGHT|wx.BOTTOM, border=10)
+		self.__grid.Add(self.__title_txt, (1, 0), flag = wx.LEFT,
+						border = MAIN_BORDER)
+		self.__grid.Add(self.__find_title, (2, 0), flag = wx.LEFT,
+						border = MAIN_BORDER)
+		self.__grid.Add(self.__author_txt, (3, 0), flag = wx.LEFT,
+						border = MAIN_BORDER)
+		self.__grid.Add(self.__find_author, (4, 0), flag = wx.LEFT,
+						border = MAIN_BORDER)
+		self.__grid.Add(self.__venue_txt, (5, 0), flag = wx.LEFT,
+						border = MAIN_BORDER)
+		self.__grid.Add(self.__find_venue, (6, 0), flag = wx.LEFT,
+						border = MAIN_BORDER)
+		self.__grid.Add(self.__year_txt, (7, 0), flag = wx.LEFT,
+						border = MAIN_BORDER)
+		self.__grid.Add(self.__find_year, (8, 0), flag = wx.LEFT,
+						border = MAIN_BORDER)
+		self.__grid.Add(self.__find_bttn, (9, 0), flag = wx.LEFT,
+						border = MAIN_BORDER)
+		self.__grid.Add(self.__doc_list, (1, 1), wx.GBSpan(10, 40),
+						wx.EXPAND|wx.RIGHT, border=MAIN_BORDER)
+		self.__grid.Add(self.__doc_properties, (11, 1), (10, 40),
+						wx.EXPAND|wx.RIGHT|wx.BOTTOM, border=MAIN_BORDER)
 
 		#self.__grid.AddGrowableCol(10)
 		#self.__grid.AddGrowableRow(1)
@@ -237,10 +251,11 @@ class PDFLibFrame(wx.Frame):
 
 	def OnSize(self, event):
 		x, y = event.GetSize()
-		#doc_list_size = 
-		#self.__doc_list.SetMinSize(event.GetSize())
-		#self.__grid.SetMinSize(event.GetSize())
-		self.__grid.Fit(self)
+		cell_x, cell_y = self.__grid.GetCellSize(1, 0)
+		max_x_size = x - cell_x - MAIN_BORDER - GAP
+		max_y_size = (y - cell_y - GAP*2 - MAIN_BORDER)/2
+		self.__doc_list.SetMaxSize((max_x_size, max_y_size))
+		self.__doc_properties.SetMaxSize((max_x_size, max_y_size))
 		self.Layout()
 		self.Refresh()
 
