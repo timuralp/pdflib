@@ -115,6 +115,7 @@ class PDFLibFrame(wx.Frame):
 		self.__find_venue = wx.TextCtrl(self, -1)
 		self.__find_year = wx.TextCtrl(self, -1)
 		self.__find_bttn = wx.Button(self, wx.ID_FIND)
+		self.__reset_bttn = wx.Button(self, wx.ID_CLEAR)
 
 		self.__grid.Add(self.__toolbar, (0, 0), wx.GBSpan(1, 40), wx.EXPAND)
 		self.__grid.Add(self.__title_txt, (1, 0), flag = wx.LEFT,
@@ -135,14 +136,12 @@ class PDFLibFrame(wx.Frame):
 						border = MAIN_BORDER)
 		self.__grid.Add(self.__find_bttn, (9, 0), flag = wx.LEFT,
 						border = MAIN_BORDER)
+		self.__grid.Add(self.__reset_bttn, (10, 0), flag = wx.LEFT,
+						border = MAIN_BORDER)
 		self.__grid.Add(self.__doc_list, (1, 1), wx.GBSpan(10, 40),
 						wx.EXPAND|wx.RIGHT, border=MAIN_BORDER)
 		self.__grid.Add(self.__doc_properties, (11, 1), (10, 40),
 						wx.EXPAND|wx.RIGHT|wx.BOTTOM, border=MAIN_BORDER)
-
-		#self.__grid.AddGrowableCol(10)
-		#self.__grid.AddGrowableRow(1)
-
 		self.SetSizer(self.__grid)
 		self.__grid.Fit(self)
 		self.Centre()
@@ -154,6 +153,8 @@ class PDFLibFrame(wx.Frame):
 		self.Bind(wx.EVT_TOOL, self.OnAddDocument, id = ADD_ID)
 		self.Bind(wx.EVT_TOOL, self.OnMakeBib, id = BIB_ID)
 		self.Bind(wx.EVT_SIZE, self.OnSize)
+		self.__find_bttn.Bind(wx.EVT_BUTTON, self.OnFind)
+		self.__reset_bttn.Bind(wx.EVT_BUTTON, self.OnClear)
 
 	def InitializeDocList(self):
 		self.__docs = load_docs_from_db()
@@ -258,6 +259,12 @@ class PDFLibFrame(wx.Frame):
 		self.__doc_properties.SetMaxSize((max_x_size, max_y_size))
 		self.Layout()
 		self.Refresh()
+
+	def OnFind(self, event):
+		pass
+	
+	def OnClear(self, event):
+		pass
 
 if __name__ == '__main__':
 	app = wx.App()
