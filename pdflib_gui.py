@@ -3,11 +3,9 @@
 import wx
 import os
 import pyPdf
-import shutil
-import hashlib
 import subprocess
 
-from pdflib_db import Paper, load_docs_from_db, add_doc_to_db
+from pdflib_db import Paper, load_docs_from_db, add_doc_to_db, pdf_repo
 
 icon_path = "tango-icon-theme/32x32/"
 
@@ -183,8 +181,8 @@ class PDFLibFrame(wx.Frame):
 		clicked = self.__doc_list.GetClientData(self.__doc_list.GetSelection())
 		if clicked == None:
 			return
-		name = u'acroread ' + pdf_repo + u'/' + clicked.GetFile()
-		subprocess.Popen(name.encode('ascii', 'replace').split(' '))
+		name = u'acroread ' + pdf_repo + u'/' + clicked.get_file()
+		subprocess.Popen(name.encode('utf_8', 'replace').split(' '))
 
 	def OnAddDocument(self, event):
 		# prompt for the document to add

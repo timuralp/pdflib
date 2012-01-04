@@ -1,5 +1,7 @@
 import sqlite3
 import os
+import hashlib
+import shutil
 
 pdf_main = os.getenv('HOME')+'/.pdflib'
 pdf_repo = pdf_main+'/docs'
@@ -127,7 +129,8 @@ def add_doc_to_db(paper):
 	#name = paper.get_title().replace(' ', '') + '_' + file_authors + '.pdf'
 	# Use an MD5 hash of name+authors
 	while 1:
-		name=hashlib.md5(paper.get_title()+'_' +file_authors).hexdigest()+'.pdf'
+		name = paper.get_title().encode('utf_8') + '_' +file_authors.encode('utf_8')
+		name=hashlib.md5(name).hexdigest()+'.pdf'
 
 		# check for existence
 		if not os.path.exists(pdf_repo+'/'+name):
